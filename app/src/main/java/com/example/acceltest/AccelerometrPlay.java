@@ -32,9 +32,10 @@ public class AccelerometrPlay extends Activity {
     private WindowManager mWindowManager;
     private Display mDisplay;
 
-    int score;
+    int score = 2;
     int flagtop = 0;
     int flagbot = 0;
+
 
 
 
@@ -131,8 +132,8 @@ public class AccelerometrPlay extends Activity {
                 mPosX += mVelX * dT + ax * dT * dT / 2;
                 mPosY += mVelY * dT + ay * dT * dT / 2;
 
-                mVelX += ax * dT;
-                mVelY += ay * dT;
+                mVelX += (ax * dT)/2;
+                mVelY += (ay * dT)/2;
             }
 
 
@@ -187,6 +188,22 @@ public class AccelerometrPlay extends Activity {
                 mLastT = t;
             }
 
+            public float getSpeed(){
+                final ParticleSystem particleSystem = mParticleSystem;
+
+                float speed = particleSystem.getVelY(0);
+
+                if(speed < 0){
+                    speed = speed * (-1);
+                }
+
+                speed = speed * 8;
+
+
+                return speed;
+            }
+
+
 
             public void update(float sx, float sy, long now) {
                 // system position
@@ -240,6 +257,10 @@ public class AccelerometrPlay extends Activity {
 
             public float getPosY(int i) {
                 return mBalls[i].mPosY;
+            }
+
+            public float getVelY(int i) {
+                return mBalls[i].mVelY;
             }
         }
 
@@ -323,6 +344,13 @@ public class AccelerometrPlay extends Activity {
             final float ys = mMetersToPixelsY;
             //String coordx = Float.toString(xc);
             //String coordy = Float.toString(yc);
+            float speed = particleSystem.getVelY(0);
+
+            if(speed < 0){
+                speed = speed * (-1);
+            }
+
+            speed = speed * 20;
 
             final int count = particleSystem.getParticleCount();
             for (int i = 0; i < count; i++) {
@@ -332,29 +360,54 @@ public class AccelerometrPlay extends Activity {
                 particleSystem.mBalls[i].setTranslationX(x);
                 particleSystem.mBalls[i].setTranslationY(y);
 
-                if(particleSystem.getPosY(i) > 0.035f && particleSystem.getPosX(i) > -0.018f && particleSystem.getPosX(i) < 0.018f && flagtop == 0){
-                    score = score + 1;
+                if(particleSystem.getPosY(i) > 0.045f && particleSystem.getPosX(i) > -0.003f && particleSystem.getPosX(i) < 0.003f && flagtop == 0){
+                    score = (score + 1) + (int)speed;
                     flagtop = 1;
                     flagbot = 0;
                 }
-                if(particleSystem.getPosY(i) < -0.035f && particleSystem.getPosX(i) > -0.018f && particleSystem.getPosX(i) < 0.018f && flagbot == 0){
-                    score = score + 1;
+                if(particleSystem.getPosY(i) > 0.045f && particleSystem.getPosX(i) < -0.003f && flagtop == 0){
+                    score = score - 1;
+                    flagtop = 1;
+                    flagbot = 0;
+                }
+                if(particleSystem.getPosY(i) > 0.045f && particleSystem.getPosX(i) > 0.003f && flagtop == 0){
+                    score = score - 1;
+                    flagtop = 1;
+                    flagbot = 0;
+                }
+
+                if(particleSystem.getPosY(i) < -0.045f && particleSystem.getPosX(i) > -0.003f && particleSystem.getPosX(i) < 0.003f && flagbot == 0){
+                    score = score + 1 + (int)speed;
+                    flagtop = 0;
+                    flagbot = 1;
+                }
+                if(particleSystem.getPosY(i) < -0.045f && particleSystem.getPosX(i) < -0.003f && flagbot == 0){
+                    score = score - 1;
+                    flagtop = 0;
+                    flagbot = 1;
+                }
+                if(particleSystem.getPosY(i) < -0.045f && particleSystem.getPosX(i) > 0.003f && flagbot == 0){
+                    score = score - 1;
                     flagtop = 0;
                     flagbot = 1;
                 }
             }
 
-            String coordy = Float.toString(particleSystem.getPosY(0));
-            String coordx = Float.toString(particleSystem.getPosX(0));
+            //String speedY= Float.toString(speed);
+            String speedY = String.format("%.2f", speed);
+            //String coordx = Float.toString(particleSystem.getPosY(0));
             String scores = Integer.toString(score);
+
+
 
             Paint paint = new Paint();
             paint.setColor(Color.BLACK);
-            paint.setTextSize(85);
-            canvas.drawText("Score:", 10, 75, paint);
-            canvas.drawText(scores, 275, 75, paint);
-            //canvas.drawText(coordx, 550, 75, paint);
-            //canvas.drawText(coordy, 850, 75, paint);
+            paint.setTextSize(60);
+            canvas.drawText("Score: " + scores, 25, (float)(yc*0.99), paint);
+            //canvas.drawText(scores, 275, (float)(yc*0.99), paint);
+            //canvas.drawText(coordx, 320, 75, paint);
+            canvas.drawText("Speed: " + speedY, 25, (float)(yc*1.2), paint);
+            //canvas.drawText(speedY, 275, (float)(yc*1.2), paint);
 
 
 
